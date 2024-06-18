@@ -1,0 +1,50 @@
+pragma solidity ^0.8.0;
+
+contract FoodTraceability {
+    
+    struct FoodItem {
+        uint256 id;
+        string name;
+        string origin;
+        uint256 timestamp;
+        string[] locations; 
+    }
+
+   
+    mapping(uint256 => FoodItem) public foodItems;
+
+   
+    event FoodItemAdded(uint256 id, string name, string origin, uint256 timestamp);
+    event LocationUpdated(uint256 id, string location, uint256 timestamp);
+
+   
+    function addFoodItem(uint256 _id, string memory _name, string memory _origin) public {
+        require(foodItems[_id].id == 0, "Food item with this ID already exists");
+
+        FoodItem storage newItem = foodItems[_id];
+        newItem.id = _id;
+        newItem.name = _name;
+        newItem.origin = _origin;
+        newItem.timestamp = block.timestamp;
+        
+        emit FoodItemAdded(_id, _name, _origin, block.timestamp);
+    }
+
+    
+    function updateLocation(uint256 _id, string memory _location) public {
+        require(foodItems[_id].id != 0, "Food item with this ID does not exist");
+
+        foodItems[_id].locations.push(_location);
+        foodItems[_id].timestamp = block.timestamp;
+
+        emit LocationUpdated(_id, _location, block.timestamp);
+    }
+
+    
+    function getFoodItem(uint256 _id) public view returns (uint256, string memory, string memory, uint256, string[] memory) {
+        require(foodItems[_id].id != 0, "Food item with this ID does not exist");
+
+        FoodItem storage item = foodItems[_id];
+        return (item.id, item.name, item.origin, item.timestamp, item.locations);
+    }
+}
